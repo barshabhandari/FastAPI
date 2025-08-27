@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>FastAPI Auth Test</title>
 </head>
 <body>
   <h2>Login</h2>
@@ -12,9 +12,28 @@
   <h3>Access Token:</h3>
   <div id="token" style="background:#eee; padding:10px;"></div>
 
+  <h3>Public Endpoint:</h3>
+  <button onclick="getPublic()">Get Public</button>
+  <div id="public" style="background:#eee; padding:10px;"></div>
+
+  <h3>Public Data:</h3>
+  <button onclick="getData1()">Get Data1</button>
+  <div id="data1" style="background:#eee; padding:10px;"></div>
+
+  <button onclick="getData2()">Get Data2</button>
+  <div id="data2" style="background:#eee; padding:10px;"></div>
+
   <h3>User Info:</h3>
   <button id="userBtn" onclick="getUserInfo()" disabled>Get User Info</button>
   <div id="userInfo" style="background:#eee; padding:10px;"></div>
+
+  <h3>Admin Info:</h3>
+  <button id="adminBtn" onclick="getAdminInfo()" disabled>Get Admin Info</button>
+  <div id="adminInfo" style="background:#eee; padding:10px;"></div>
+
+  <h3>Secret Data (Admin Only):</h3>
+  <button id="secretBtn" onclick="getSecretData()" disabled>Get Secret Data</button>
+  <div id="secretData" style="background:#eee; padding:10px;"></div>
 
   <script>
     let token = '';
@@ -37,30 +56,67 @@
         const json = await res.json();
         token = json.access_token;
         document.getElementById('token').innerText = token;
+
+        // enable protected route buttons
         document.getElementById('userBtn').disabled = false;
+        document.getElementById('adminBtn').disabled = false;
+        document.getElementById('secretBtn').disabled = false;
+
         document.getElementById('userInfo').innerText = '';
+        document.getElementById('adminInfo').innerText = '';
+        document.getElementById('secretData').innerText = '';
       } else {
         const err = await res.json();
         document.getElementById('token').innerText = 'Error: ' + err.detail;
+
+        // disable protected route buttons
         document.getElementById('userBtn').disabled = true;
-        document.getElementById('userInfo').innerText = '';
+        document.getElementById('adminBtn').disabled = true;
+        document.getElementById('secretBtn').disabled = true;
       }
+    }
+
+    async function getPublic() {
+      const res = await fetch('http://127.0.0.1:8000/public');
+      const json = await res.json();
+      document.getElementById('public').innerText = JSON.stringify(json, null, 2);
+    }
+
+    async function getData1() {
+      const res = await fetch('http://127.0.0.1:8000/data1');
+      const json = await res.json();
+      document.getElementById('data1').innerText = JSON.stringify(json, null, 2);
+    }
+
+    async function getData2() {
+      const res = await fetch('http://127.0.0.1:8000/data2');
+      const json = await res.json();
+      document.getElementById('data2').innerText = JSON.stringify(json, null, 2);
     }
 
     async function getUserInfo() {
       const res = await fetch('http://127.0.0.1:8000/user', {
         headers: { Authorization: 'Bearer ' + token }
       });
+      const json = await res.json();
+      document.getElementById('userInfo').innerText = JSON.stringify(json, null, 2);
+    }
 
-      if (res.ok) {
-        const json = await res.json();
-        document.getElementById('userInfo').innerText = JSON.stringify(json, null, 2);
-      } else {
-        const err = await res.json();
-        document.getElementById('userInfo').innerText = 'Error: ' + err.detail;
-      }
+    async function getAdminInfo() {
+      const res = await fetch('http://127.0.0.1:8000/admin', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const json = await res.json();
+      document.getElementById('adminInfo').innerText = JSON.stringify(json, null, 2);
+    }
+
+    async function getSecretData() {
+      const res = await fetch('http://127.0.0.1:8000/secret_data', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const json = await res.json();
+      document.getElementById('secretData').innerText = JSON.stringify(json, null, 2);
     }
   </script>
 </body>
 </html>
-

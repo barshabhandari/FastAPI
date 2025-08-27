@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, HTTPException, Depends
 # from fastapi.security import OAuth2PasswordBearer
 from app.routers.auth import get_current_user
@@ -15,11 +16,16 @@ def user_route(user: dict = Depends(get_current_user)):
     return {"message": f"Hello {user['sub']}, you have access!"}
 
 
-@router.get("/admin")
-def admin_route(user: dict = Depends(get_current_user)):
-    if user["role"] != "admin":
+
+def get_current_admin(user: dict = Depends(get_current_user)):
+    if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
-    return {"message": "Welcome Admin!"}
+    return user
+
+
+@router.get("/admin")
+def admin_route(admin: dict = Depends(get_current_admin)):
+    return {"message": f"Welcome Admin! {admin['sub']}"}
 
 
 @router.get("/data1")
