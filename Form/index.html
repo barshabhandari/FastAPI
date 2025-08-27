@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <input id="username" placeholder="Username" /><br><br>
+  <input id="password" placeholder="Password" type="password" /><br><br>
+  <button onclick="login()">Login</button>
+
+  <h3>Access Token:</h3>
+  <div id="token" style="background:#eee; padding:10px;"></div>
+
+  <h3>User Info:</h3>
+  <button id="userBtn" onclick="getUserInfo()" disabled>Get User Info</button>
+  <div id="userInfo" style="background:#eee; padding:10px;"></div>
+
+  <script>
+    let token = '';
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const data = new URLSearchParams();
+      data.append('username', username);
+      data.append('password', password);
+
+      const res = await fetch('http://127.0.0.1:8000/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: data
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        token = json.access_token;
+        document.getElementById('token').innerText = token;
+        document.getElementById('userBtn').disabled = false;
+        document.getElementById('userInfo').innerText = '';
+      } else {
+        const err = await res.json();
+        document.getElementById('token').innerText = 'Error: ' + err.detail;
+        document.getElementById('userBtn').disabled = true;
+        document.getElementById('userInfo').innerText = '';
+      }
+    }
+
+    async function getUserInfo() {
+      const res = await fetch('http://127.0.0.1:8000/user', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        document.getElementById('userInfo').innerText = JSON.stringify(json, null, 2);
+      } else {
+        const err = await res.json();
+        document.getElementById('userInfo').innerText = 'Error: ' + err.detail;
+      }
+    }
+  </script>
+</body>
+</html>
+
