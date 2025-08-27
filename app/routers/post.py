@@ -14,7 +14,7 @@ def public_route():
 def user_route(user: dict = Depends(get_current_user)):
     return {"message": f"Hello {user['sub']}, you have access!"}
 
-# Admin-only route
+
 @router.get("/admin")
 def admin_route(user: dict = Depends(get_current_user)):
     if user["role"] != "admin":
